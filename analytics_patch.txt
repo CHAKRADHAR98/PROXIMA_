@@ -1,0 +1,111 @@
+    def update_analytics(self):
+        try:
+            # Get time range
+            time_range = self.time_range_combo.currentText()
+            
+            # Calculate time filter
+            now = datetime.now()
+            if time_range == "Last Hour":
+                time_filter = now - timedelta(hours=1)
+            elif time_range == "Last Day":
+                time_filter = now - timedelta(days=1)
+            elif time_range == "Last Week":
+                time_filter = now - timedelta(weeks=1)
+            else:  # All Data
+                time_filter = datetime.min
+            
+            # Check if data file exists
+            if not os.path.exists('processed_data/crowd_data.csv'):
+                self.statusBar().showMessage("No data available. Run video processing first", 5000)
+                return
+                
+            # Load crowd data
+            try:
+                times = []
+                crowd_counts = []
+                violation_counts = []
+                abnormal_events = []
+                
+                with open('processed_data/crowd_data.csv', 'r') as file:
+                    # Check if file is empty
+                    if os.path.getsize('processed_data/crowd_data.csv') == 0:
+                        self.statusBar().showMessage("Data file is empty. Run video processing to collect data", 5000)
+                        return
+                        
+                    # Try to read header
+                    header = file.readline().strip()
+                    if not header:
+                        self.statusBar().showMessage("Data file has no content", 5000)
+                        return
+                    
+                    # Read data lines
+                    for line in file:
+                        parts = line.strip().split(',')
+                        if len(parts) >= 5:
+                            # Parse time (handle both timestamp and frame number)
+                            try:
+                                if parts[0].isdigit():
+                                    # Frame number - convert to a time point
+                                    time_point = int(parts[0])
+                                else:
+                                    # Date string - convert to datetime
+                                    time_point = datetime.strptime(parts[0], "%Y-%m-%d %H:%M:%S")
+                                    # Skip if before filter
+                                    if time_point < time_filter:
+                                        continue
+                            except Exception as e:
+                                print(f"Error parsing time: {e}")
+                                continue
+                                
+                            # Extract data
+                            try:
+                                crowd_count = int(parts[1])
+                                violation_count = int(parts[2])
+                                abnormal = bool(int(parts[4]))
+                                
+                                times.append(time_point)
+                                crowd_counts.append(crowd_count)
+                                violation_counts.append(violation_count)
+                                abnormal_events.append(1 if abnormal else 0)
+                            except Exception as e:
+                                print(f"Error parsing data values: {e}")
+                                continue
+                
+                # Update plots
+                if len(times) > 0:
+                    # Clear previous plots
+                    self.crowd_plot_widget.clear()
+                    self.violation_plot_widget.clear()
+                    self.abnormal_plot_widget.clear()
+                    
+                    # Create new plots
+                    self.crowd_plot_widget.plot(times, crowd_counts, pen='g')
+                    self.violation_plot_widget.plot(times, violation_counts, pen='y')
+                    self.abnormal_plot_widget.plot(times, abnormal_events, pen='r', 
+                                                  symbolBrush=(255,0,0), symbol='o', 
+                                                  symbolPen='r')
+                    
+                    # Update summary stats
+                    if crowd_counts:
+                        self.stats_summary.setItem(0, 1, QTableWidgetItem(str(max(crowd_counts))))
+                        self.stats_summary.setItem(1, 1, QTableWidgetItem(str(round(sum(crowd_counts)/len(crowd_counts), 1))))
+                    else:
+                        self.stats_summary.setItem(0, 1, QTableWidgetItem("0"))
+                        self.stats_summary.setItem(1, 1, QTableWidgetItem("0"))
+                        
+                    self.stats_summary.setItem(2, 1, QTableWidgetItem(str(sum(violation_counts))))
+                    self.stats_summary.setItem(3, 1, QTableWidgetItem(str(sum(abnormal_events))))
+                else:
+                    self.statusBar().showMessage("No data found for selected time range", 5000)
+            except Exception as e:
+                self.statusBar().showMessage(f"Error loading crowd data: {str(e)}", 5000)
+                print(f"Error loading crowd data: {str(e)}")
+                
+            # Get alert count from database
+            self.cursor.execute("SELECT COUNT(*) FROM alerts")
+            alert_count = self.cursor.fetchone()[0]
+            self.stats_summary.setItem(4, 1, QTableWidgetItem(str(alert_count)))
+                
+        except Exception as e:
+            self.statusBar().showMessage(f"Error updating analytics: {str(e)}", 5000)
+            print(f"Error updating analytics: {str(e)}")

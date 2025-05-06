@@ -1,0 +1,12 @@
+Defaulting to user installation because normal site-packages is not writeable
+Collecting PyQt5
+  Using cached PyQt5-5.15.11-cp38-abi3-manylinux_2_17_x86_64.whl (8.2 MB)
+Collecting pyqtgraph
+  Using cached pyqtgraph-0.13.7-py3-none-any.whl (1.9 MB)
+Collecting PyQt5-sip<13,>=12.15
+  Using cached PyQt5_sip-12.17.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.whl (270 kB)
+Collecting PyQt5-Qt5<5.16.0,>=5.15.2
+  Using cached PyQt5_Qt5-5.15.16-1-py3-none-manylinux2014_x86_64.whl (61.1 MB)
+Requirement already satisfied: numpy>=1.22.0 in /home/chakradhar/.local/lib/python3.10/site-packages (from pyqtgraph) (1.24.3)
+Installing collected packages: PyQt5-Qt5, pyqtgraph, PyQt5-sip, PyQt5
+Successfully installed PyQt5-5.15.11 PyQt5-Qt5-5.15.16 PyQt5-sip-12.17.0 pyqtgraph-0.13.7
