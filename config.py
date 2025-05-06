@@ -2,18 +2,25 @@ import datetime
 
 # Video Path
 VIDEO_CONFIG = {
-	"VIDEO_CAP" : "video/7.mp4",
-	"IS_CAM" : False,
-	"CAM_APPROX_FPS": 3,
-	"HIGH_CAM": False,
-	"START_TIME": datetime.datetime(2020, 11, 5, 0, 0, 0, 0)
+    "VIDEO_CAP" : "test.mp4",
+    "IS_CAM" : False,
+    "CAM_APPROX_FPS": 3,
+    "HIGH_CAM": False,
+    "START_TIME": datetime.datetime(2020, 11, 5, 0, 0, 0, 0)
 }
 
-# Load YOLOv3-tiny weights and config
+# YOLOv8 Config (replaces YOLOv4 config)
 YOLO_CONFIG = {
-	"WEIGHTS_PATH" : "YOLOv4-tiny/yolov4-tiny.weights",
-	"CONFIG_PATH" : "YOLOv4-tiny/yolov4-tiny.cfg"
+    "MODEL_PATH" : "yolov8n.pt",
+    "DEVICE" : "cpu"
 }
+
+# CPU performance optimizations
+CPU_CONFIG = {
+    "FRAME_SKIP" : 2,  # Process every 2nd frame
+    "PROCESSING_WIDTH" : 640  # Reduced from 1080 for CPU performance
+}
+
 # Show individuals detected
 SHOW_PROCESSING_OUTPUT = True
 # Show individuals detected
@@ -48,6 +55,6 @@ MIN_CONF = 0.3
 # Threshold for Non-maxima surpression
 NMS_THRESH = 0.2
 # Resize frame for processing
-FRAME_SIZE = 1080
+FRAME_SIZE = CPU_CONFIG["PROCESSING_WIDTH"]
 # Tracker max missing age before removing (seconds)
 TRACK_MAX_AGE = 3
